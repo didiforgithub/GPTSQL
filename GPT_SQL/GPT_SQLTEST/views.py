@@ -20,6 +20,8 @@ def get_table_name(request):
 
     return JsonResponse(result,safe=False)
 
+
+
 # API-2 自然语言转SQL语句（API-2key版本，无需给服务器配梯子）
 def gpt_sql(request):
     if request.method == 'POST':
@@ -69,6 +71,43 @@ def gpt_sql_OPenai(request):
             {"role":"assistant","content":"Here's what I need" + questions}
         ]   
         )
+
+#API2 11/1 更新Prompt
+def gpt_sql_new(request):
+    if request.method == 'POST':
+
+        json_str_bytes = request.body
+        json_str = json_str_bytes.decode()
+        question_dict = json.loads(json_str,strict=False)
+
+        question = question_dict['question']
+        table_name = "SmartPension"
+        table_information = str(tools.table_information_get())
+
+
+        prompt = f"""
+        You are a data scientist, you are good at convert natural language into SQL statements.
+        The table's name is {table_name} and it has a structure {table_information}.
+        You need to wrting SQL Statements to answer this question {question}.
+
+        Response Format:
+        You must respond in JSON format as described below:
+        {
+            "result": SQL Statement
+        }
+
+        Ensure the response can be parsed by Python json.loads
+        """
+
+        load_dotenv()
+        openai.api_key = os.getenv("OPENAI_API_KEY")
+        completion = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+            {"role":"user","content":prompt}
+        ]
+        )
+        return completion["choices"][1]["content"]
 
 # API3 获取SQL语句后，执行语句，返回数据
 def Info_get(request):
