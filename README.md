@@ -24,6 +24,3 @@ python manage.py runserver
 2. 检索知识与数据知识的连接
 3. 用户系统连接
 
-架构设计
-
-![Alt text](CSV_solution.png)
